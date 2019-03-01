@@ -2,6 +2,23 @@
 //Google Maps API Key: AIzaSyBrwwwbvDLEEipFn_nr9sUtcVWqRugE2OA
 
 
+$( document ).ready(function() {
+datePicker();
+
+
+});
+
+
+var datePicker = function(){
+  $('input[name="daterange"]').daterangepicker({
+    opens: 'left'
+  }, function(start, end, label) {
+    console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+  });
+}
+
+
+
 
 var travelDate = "2020.01.01" //hard coded date, to be updated once date picker is implemented.
 var unixTravelDate = moment(travelDate, 'YYYY.MM.DD').unix();
