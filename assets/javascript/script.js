@@ -4,19 +4,21 @@
 
 
 
-var travelDate = "2019.03.25";
-
-var unixTravelDate = moment(travelDate, 'YYYY.MM.DD').unix();
-var destination = "london"; //hard coded destination until front end form is complete.
-var coordinates
-var formDestination;
+var destination;
 var units;
+var travelDate;
 
 var datePicker = function () {
   $('input[name="daterange"]').daterangepicker({
-    opens: 'left'
+    opens: 'left',
+    timeZone: 'utc'
   }, function (start, end, label) {
-    console.log("A new date selection was made: " + start.format('MM-DD-YYYY') + ' to ' + end.format('YYYY-MM-DD'));
+    var dateArray = [];
+    while (start <= end) {
+      dateArray.push(moment(start).unix());
+      start = (moment(start).add(1, 'days'));
+    }
+    travelDate = dateArray;
   });
 }
 
@@ -24,64 +26,68 @@ var datePicker = function () {
 var userInput = function () {
   var userName = $("#inputName").val();
   var userGender = $("#inputGender").val();
-  var destination = $("#inputLocation").val();
-  var dates = $("#inputDate").val();
+  destination = $("#inputLocation").val();
   units = $("#inputUnits").val();
-
-  console.log(userName);
-  console.log(userGender);
-  console.log(destination);
-  console.log(dates);
-  console.log(units);
-
 }
 
-$('#buttonSubmit').click(userInput);
 
 
-
-
-
-
-var setWeather = function(){
+var setWeather = function () {
   var proxy = 'https://cors-anywhere.herokuapp.com/'
-$.ajax({
-  url: `https://maps.googleapis.com/maps/api/geocode/json?address=${destination}&key=AIzaSyBQl-QMKAwNvWndyQcRfqlz39Ke6xZcb5w`,
-  method: "Get"
-}).then(function (results) {
-  console.log(results);
-  coordinates = results.results[0].geometry.location;
-  formDestination = results.results[0].formatted_address;
-
-
-
   $.ajax({
-    url: `${proxy}https://api.darksky.net/forecast/b9dc6901023a8337df6a5c58be197ba0/${coordinates.lat},${coordinates.lng},${unixTravelDate}?units=${units}&exclude=minutely,hourly,alerts,flags,currently`,
-    headers: { 'Access-Control-Allow-Origin': '*' },
-    method: "GET"
+    url: `https://maps.googleapis.com/maps/api/geocode/json?address=${destination}&key=AIzaSyBQl-QMKAwNvWndyQcRfqlz39Ke6xZcb5w`,
+    method: "Get"
   }).then(function (results) {
-    console.log($(results))
-    var weatherData = results.daily.data[0];
-    var unitsSign;
-    if(units === "us"){
-      unitsSign = "°F"
-    }
-    else(
-      unitsSign = "°C"
-    )
-    $(
-      `<div>Expected temperature range in ${formDestination} is going to be: <div>
-            <div>High temperature: ${weatherData.temperatureHigh} ${unitsSign} </div>
-            <div>Low Temperature: ${weatherData.temperatureLow} ${unitsSign} </div>`
-    ).appendTo("#weather")
+    console.log(results);
+    var coordinates = results.results[0].geometry.location;
+    var formDestination = results.results[0].formatted_address;
+    $(`<div id="outputLocation">Expected temperature range in ${formDestination} is going to be: <div>`).appendTo("#weatherInfoDiv")
 
-  });
-})
+
+    for (i = 0; i < travelDate.length; i++) {
+      console.log(travelDate[i]);
+      $.ajax({
+        url: `${proxy}https://api.darksky.net/forecast/b9dc6901023a8337df6a5c58be197ba0/${coordinates.lat},${coordinates.lng},${travelDate[i]}?units=${units}`,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        method: "GET"
+      }).then(function (results) {
+
+        console.log($(results))
+        var weatherData = results.daily.data[0];
+        var unitsSign;
+        
+        if (units === "us") {
+          unitsSign = "°F"
+        }
+        else (
+          unitsSign = "°C"
+        )
+
+        var weatherDay = moment.unix(results.currently.time).format("YYYY-MM-DD");
+
+
+        $(`<br>
+          <div>Weather Date: ${weatherDay}</div>
+          <div>High temperature: ${weatherData.temperatureHigh} ${unitsSign} </div>
+          <div>Low Temperature: ${weatherData.temperatureLow} ${unitsSign} </div><br>`
+        ).appendTo("#weatherInfoDiv")
+
+      });
+
+    }
+
+  })
 
 }
 
+var handleSubmit = function(){
+  userInput();
+  setWeather();
+}
 
 
 $(document).ready(function () {
   datePicker();
+  $('#buttonSubmit').click(handleSubmit);
 });
+
