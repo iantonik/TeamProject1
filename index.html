@@ -9,8 +9,8 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-    
-   
+
+
     <!-- CSS link -->
     <link rel="stylesheet" href="assets/css/reset.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
@@ -29,7 +29,7 @@
     <div class="container" id="inputDiv">
         <form>
             <label for="name">Name</label>
-            <input type="text" name="name" placeholder="First name"></input><br>
+            <input type="text" name="name" id="inputName" placeholder="First name"></input><br>
             <label for="gender">Gender</label>
             <select name="gender" id="inputGender">
                 <option value="">Select Gender</option>
@@ -38,10 +38,16 @@
             </select>
             <br>
             <label for="travelDestination">Travel Destination</label>
-            <input type="text" name="travelDestination" placeholder="City, Country"></input><br>
+            <input type="text" id="inputLocation" name="travelDestination" placeholder="City, Country"></input><br>
             <label for="daterange">Travel Dates</label>
-            <input type="text" name="daterange" value="" /><br>
-            <input type="submit" value="Submit">
+            <input type="text" id="inputDate" name="daterange" value="" /><br>
+            <label for="units">Prefered units of temperature</label>
+            <select name="units" id="inputUnits">
+                <option value="us">°Fahrenheit</option>
+                <option value="si">°Celsius</option>
+            </select>
+
+            <input type="button" id="buttonSubmit" value="Submit">
 
         </form>
 
