@@ -39,6 +39,8 @@ var userInput = function () {
 var setWeather = async function () {
   var proxy = 'https://cors-anywhere.herokuapp.com/'
   var weatherArray = [];
+  var lowestTemp=0;
+  var highestTemp=0;
   var results = await $.ajax({
     url: `https://maps.googleapis.com/maps/api/geocode/json?address=${destination}&key=AIzaSyBQl-QMKAwNvWndyQcRfqlz39Ke6xZcb5w`,
     method: "Get"
@@ -56,7 +58,6 @@ var setWeather = async function () {
       method: "GET"
     });
     var weatherData = innerRes.daily.data[0];
-
     var weatherDay = moment.unix(innerRes.currently.time).format("YYYY-MM-DD");
 
     var object = {
@@ -68,13 +69,19 @@ var setWeather = async function () {
     };
 
     weatherArray.push(object);
+
+    if(weatherData.temperatureLow < lowestTemp){
+      lowestTemp = weatherData.temperatureLow;
+    }
+    if(weatherData.temperatureHigh > highestTemp){
+      highestTemp = weatherData.temperatureHigh;
+    }
+
+
   }
-  return weatherArray;
-
+  return [weatherArray,highestTemp,lowestTemp];
+  
 }
-
-
-
 
 
 var populateWeatherDate = function (x) {
@@ -92,14 +99,55 @@ var populateWeatherDate = function (x) {
 
 var handleSubmit = async function () {
   userInput();
-  var weeatherArray = await setWeather();
-  populateWeatherDate(weeatherArray);
+  var weatherArray = await setWeather();
+  populateWeatherDate(weatherArray[0]);
+  console.log(weatherArray);
+  getRecommendation(weatherArray[1],weatherArray[2])
 
 }
+
+
+var wardrobe = [
+  {
+    item: "sunscreen",
+    image: "assets/images/icons/100px_iconSunscreen.png",
+    lowTemp: 68,
+    highTemp: undefined,
+  },
+  {
+    item: "pants",
+    image: "assets/images/icons/100px_iconPants.png",
+    lowTemp: undefined,
+    highTemp: 67,
+  },
+  {
+    item: "sweater",
+    image: "assets/images/icons/100px_iconSweater.png",
+    lowTemp: undefined,
+    highTemp: 67,
+  }
+  ]
+
+var getRecommendation = function (highTemperature, lowTemperature){
+
+
+  // var highTemperature = 100; //hard coded, will integrate before class
+  // var lowTemperature = 69;// hard coded, will integrate before class
+   
+  wardrobe.forEach(element => {
+
+    if( (!element.lowTemp || (element.lowTemp<=lowTemperature)) && (!element.highTemp || (element.highTemp>=highTemperature)) ){
+      $(`<div class="iconDiv" data-clotingkeyword="${element.item}">
+      <img src="${element.image}" class="iconImage">
+      <div class="iconText">${element.item}</div>`).appendTo("#iconsAppearHereDiv");
+    }
+  });
+
+}
+
 
 
 $(document).ready(function () {
   datePicker();
   $('#buttonSubmit').click(handleSubmit);
 });
-
